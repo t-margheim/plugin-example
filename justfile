@@ -12,7 +12,7 @@ generate-go:
 
 # generate python implementation of proto files
 generate-python:
-    python3 -m grpc_tools.protoc -I ./proto --python_out=./plugins/subtractor --grpc_python_out=./plugins/subtractor ./proto/mather.proto
+    python3 -m grpc_tools.protoc -I ./proto --python_out=./plugins/subtractor --grpc_python_out=./plugins/subtractor ./proto/mather.proto ./proto/grpc_stdio.proto
 
 # run the mercury server with the plugins
 run: compile-plugins

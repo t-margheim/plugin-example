@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -34,7 +33,9 @@ func main() {
 	}
 
 	var mathers []sdk.Mather
+	logger.Debug("loading plugins from config")
 	for _, cfg := range pluginConfigs {
+		logger.Debug("creating new client", "plugin", cfg.key)
 		client := plugin.NewClient(&plugin.ClientConfig{
 			HandshakeConfig:  sdk.HandshakeConfig,
 			Plugins:          pluginMap,
@@ -45,12 +46,14 @@ func main() {
 		defer client.Kill()
 
 		// Connect via RPC
+		logger.Debug("connecting to client", "plugin", cfg.key)
 		rpcClient, err := client.Client()
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		// Request the plugin
+		logger.Debug("requesting plugin", "plugin", cfg.key)
 		raw, err := rpcClient.Dispense(cfg.key)
 		if err != nil {
 			log.Fatal(err)
@@ -58,13 +61,16 @@ func main() {
 
 		// We should have a Mather now! This feels like a normal interface
 		// implementation but is in fact over an RPC connection.
+		logger.Debug("casting to mather", "plugin", cfg.key)
 		mather := raw.(sdk.Mather)
 
+		logger.Debug("adding to mathers", "plugin", cfg.key)
 		mathers = append(mathers, mather)
 	}
 
-	for _, m := range mathers {
-		fmt.Println(m.DoMath(4, 6))
+	logger.Debug("calling plugins")
+	for i, m := range mathers {
+		logger.Info("called plugin", "plugin", pluginConfigs[i].key, "result", m.DoMath(4, 6))
 	}
 }
 
